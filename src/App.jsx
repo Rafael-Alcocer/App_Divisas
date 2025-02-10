@@ -72,8 +72,8 @@ function Login({ onLogin }) {
     const [password, setPassword] = useState("");
 
     const handleLogin = () => {
-        const validUser = "admin";
-        const validPassword = "1234";
+        const validUser = "Lidia";
+        const validPassword = "Lidia2025";
 
         if (user === validUser && password === validPassword) {
             localStorage.setItem("isLoggedIn", "true"); // Guarda sesión en localStorage
@@ -144,8 +144,8 @@ function Home({ onLogout }) {
             <button onClick={onLogout} style={styles.button}>Cerrar Sesión</button>
 
             {loading ? <p>Cargando...</p> : (
-                <div style={{ overflowX: "auto", maxWidth: "80%" }}>
-                    <table border="1" style={{ margin: "20px auto", width: "100%" }}>
+                <div style={styles.tableContainer}>
+                    <table border="1" style={styles.table}>
                         <thead>
                             <tr>
                                 <th>Moneda</th>
@@ -194,8 +194,13 @@ export default function App() {
 // ESTILOS CSS EN OBJETO
 const styles = {
     container: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
         textAlign: "center",
-        marginTop: "50px",
+        padding: "20px",
     },
     input: {
         display: "block",
@@ -211,5 +216,16 @@ const styles = {
         border: "none",
         cursor: "pointer",
         marginTop: "10px",
+    },
+    tableContainer: {
+        display: "flex",
+        justifyContent: "center",
+        width: "100%",
+        marginTop: "20px",
+    },
+    table: {
+        borderCollapse: "collapse",
+        width: "80%",
+        textAlign: "center",
     },
 };
