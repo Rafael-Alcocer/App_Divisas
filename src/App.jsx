@@ -66,11 +66,39 @@ const allowedCountries = [
     "Perú"
 ];
 
-function App() {
+// COMPONENTE DE LOGIN
+function Login({ onLogin }) {
+    const [user, setUser] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleLogin = () => {
+        const validUser = "admin";
+        const validPassword = "1234";
+
+        if (user === validUser && password === validPassword) {
+            localStorage.setItem("isLoggedIn", "true"); // Guarda sesión en localStorage
+            onLogin(true);
+        } else {
+            alert("Usuario o contraseña incorrectos");
+        }
+    };
+
+    return (
+        <div style={styles.container}>
+            <h2>Iniciar Sesión</h2>
+            <input type="text" placeholder="Usuario" onChange={(e) => setUser(e.target.value)} style={styles.input} />
+            <input type="password" placeholder="Contraseña" onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+            <button onClick={handleLogin} style={styles.button}>Entrar</button>
+        </div>
+    );
+}
+
+// COMPONENTE PRINCIPAL CONVERSOR DE DIVISAS
+function Home({ onLogout }) {
     const [rates, setRates] = useState({});
     const [base, setBase] = useState("USD");
     const [loading, setLoading] = useState(true);
-    const [filterAllowed, setFilterAllowed] = useState(false); // Estado del checkbox
+    const [filterAllowed, setFilterAllowed] = useState(false);
 
     useEffect(() => {
         fetch(`https://v6.exchangerate-api.com/v6/29aeb59585609d944e534f49/latest/${base}`)
@@ -82,30 +110,20 @@ function App() {
             .catch((error) => console.error("Error fetching data:", error));
     }, [base]);
 
-    // Convertimos el objeto en una lista y la ordenamos por código de moneda
     const sortedRates = Object.entries(rates)
         .map(([currency, value]) => ({
             currency,
-            country: countryCurrencyMap[currency] || "Otro País", // Si no está en la lista, pone "Otro País"
+            country: countryCurrencyMap[currency] || "Otro País",
             value,
         }))
-        .sort((a, b) => a.currency.localeCompare(b.currency)); // Ordenar por código de moneda
+        .sort((a, b) => a.currency.localeCompare(b.currency));
 
-    // Filtrar los datos si el checkbox está activado (solo mostrar los países permitidos)
     const filteredRates = filterAllowed
         ? sortedRates.filter(({ country }) => allowedCountries.includes(country))
         : sortedRates;
 
     return (
-        <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            minHeight: "100vh",
-            textAlign: "center",
-            overflowY: "auto",
-            padding: "20px"
-        }}>
+        <div style={styles.container}>
             <h1>Conversor de Divisas</h1>
 
             <label>
@@ -118,15 +136,12 @@ function App() {
                 </select>
             </label>
 
-            {/* Checkbox para mostrar/ocultar países fuera de la lista */}
             <div style={{ marginTop: "10px" }}>
-                <input
-                    type="checkbox"
-                    checked={filterAllowed}
-                    onChange={() => setFilterAllowed(!filterAllowed)}
-                />
-                <label> Mostrar solo países donde esta la empresa</label>
+                <input type="checkbox" checked={filterAllowed} onChange={() => setFilterAllowed(!filterAllowed)} />
+                <label> Mostrar solo países donde está la empresa</label>
             </div>
+
+            <button onClick={onLogout} style={styles.button}>Cerrar Sesión</button>
 
             {loading ? <p>Cargando...</p> : (
                 <div style={{ overflowX: "auto", maxWidth: "80%" }}>
@@ -154,4 +169,47 @@ function App() {
     );
 }
 
-export default App;
+// COMPONENTE PRINCIPAL QUE MANEJA LOGIN
+export default function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        if (localStorage.getItem("isLoggedIn") === "true") {
+            setIsLoggedIn(true);
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem("isLoggedIn");
+        setIsLoggedIn(false);
+    };
+
+    return (
+        <div>
+            {isLoggedIn ? <Home onLogout={handleLogout} /> : <Login onLogin={setIsLoggedIn} />}
+        </div>
+    );
+}
+
+// ESTILOS CSS EN OBJETO
+const styles = {
+    container: {
+        textAlign: "center",
+        marginTop: "50px",
+    },
+    input: {
+        display: "block",
+        margin: "10px auto",
+        padding: "10px",
+        fontSize: "16px",
+    },
+    button: {
+        padding: "10px 20px",
+        fontSize: "16px",
+        backgroundColor: "#007bff",
+        color: "#fff",
+        border: "none",
+        cursor: "pointer",
+        marginTop: "10px",
+    },
+};
